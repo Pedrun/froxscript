@@ -23,10 +23,13 @@ fn parse_rog(
                 parse_number(primary.as_str(), attr_map)?,
                 String::new(),
             )),
-            Rule::attribute => Ok(RogCons::from_number(
-                parse_number(primary.as_str(), attr_map)?,
-                primary.as_str().to_string(),
-            )),
+            Rule::attribute => {
+                let res = parse_number(primary.as_str(), attr_map)?;
+                Ok(RogCons::from_number(
+                    res,
+                    format!("[{}] {}", res, primary.as_str()),
+                ))
+            }
             Rule::expression => Ok(parse_rog(primary.into_inner(), pratt, attr_map)?),
             Rule::group => {
                 let mut exp = parse_rog(primary.into_inner(), pratt, attr_map)?;
@@ -84,7 +87,7 @@ fn parse_number(text: &str, attr_map: &HashMap<String, f64>) -> Result<f64, RogE
         _ => false,
     });
     Ok(if let Some(split) = a_start {
-        if split != 0 {
+        if split == 0 {
             *attr_map.get(text).ok_or(RogErr::InvalidAttribute)?
         } else {
             let (num, attr) = text.split_at(split);
@@ -206,9 +209,15 @@ pub fn parse(input: String, attr_map: HashMap<String, f64>) -> Option<RogCons> {
 #[test]
 fn test() {
     let pratt = get_parser();
-    let pairs = RogParser::parse(Rule::expression, "dH").unwrap();
+    let pairs = RogParser::parse(Rule::expression, "d20 + 2LONGO * C + 4").unwrap();
+    let map = HashMap::from([
+        (String::from("A"), 10.),
+        (String::from("B"), 15.),
+        (String::from("C"), 392.),
+        (String::from("LONGO"), 8.),
+    ]);
     //dbg!(&pairs);
-    let res = parse_rog(pairs, &pratt, &HashMap::new());
+    let res = parse_rog(pairs, &pratt, &map);
     println!("{:?}", res);
 }
 
