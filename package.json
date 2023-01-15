@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@napi-rs/cli": "^2.14.3"
+  }
+}
