@@ -1,3 +1,9 @@
+repeat = { repeat_literal? ~ assignment ~ comment? ~ EOI }
+    repeat_literal = @{ integer ~ "#" }
+    comment = { ";" ~ ANY* }
+
+assignment = { (attribute_literal ~ ":=")? ~ expression }
+
 expression = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
 
 prefix = _{ neg | not }
@@ -40,9 +46,10 @@ primary = _{ fate_dice | dice | number | group }
             aro = { "aro" }
             sort = { "s" }
     number = _{ attribute | integer }
-        attribute = ${ integer? ~ 'A'..'Z'+ }
+        attribute = @{ integer? ~ attribute_literal }
+        attribute_literal = { "$"? ~ 'A'..'Z'+ }
         integer = @{ '0'..'9'+ }
     group = { "(" ~ expression ~ ")" }
 
 
-WHITESPACE = _{ " " | "\t" | "\n" }
+WHITESPACE = _{ " " | "\t" }

@@ -12,7 +12,7 @@ struct RogParser;
 use pest::{iterators::Pairs, pratt_parser::*, Parser};
 use pest_derive::Parser;
 
-fn parse_rog(
+fn parse_expression(
     pairs: Pairs<Rule>,
     pratt: &PrattParser<Rule>,
     attr_map: &HashMap<String, f64>,
@@ -30,9 +30,9 @@ fn parse_rog(
                     format!("[{}] {}", res, primary.as_str()),
                 ))
             }
-            Rule::expression => Ok(parse_rog(primary.into_inner(), pratt, attr_map)?),
+            Rule::expression => Ok(parse_expression(primary.into_inner(), pratt, attr_map)?),
             Rule::group => {
-                let mut exp = parse_rog(primary.into_inner(), pratt, attr_map)?;
+                let mut exp = parse_expression(primary.into_inner(), pratt, attr_map)?;
                 exp.text = format!("({})", exp.text);
                 Ok(exp)
             }
@@ -83,7 +83,7 @@ fn parse_rog(
 
 fn parse_number(text: &str, attr_map: &HashMap<String, f64>) -> Result<f64, RogErr> {
     let a_start = text.find(|c| match c {
-        'A'..='Z' => true,
+        'A'..='Z' | '$' => true,
         _ => false,
     });
     Ok(if let Some(split) = a_start {
@@ -199,26 +199,123 @@ fn get_parser() -> PrattParser<Rule> {
         .op(Op::prefix(Rule::neg) | Op::prefix(Rule::not))
 }
 
+fn parse_assignment(
+    pairs: Pairs<Rule>,
+    pratt: &PrattParser<Rule>,
+    attr_map: &mut HashMap<String, f64>,
+) -> Result<RogCons, RogErr> {
+    let mut it = pairs.rev();
+    let expression_pairs = it.next().ok_or(RogErr::UnknownError)?.into_inner();
+    let mut result = parse_expression(expression_pairs, pratt, attr_map)?;
+
+    let assignment_pairs = it.next();
+    if let Some(assign) = assignment_pairs {
+        let key = assign.as_str().trim().to_string();
+        if !key.starts_with('$') && !attr_map.contains_key(&key) {
+            return Err(RogErr::InvalidAttribute);
+        }
+        attr_map.insert(key.clone(), result.value);
+        if attr_map.len() > 100 {
+            return Err(RogErr::AttributeMax);
+        }
+        result.text = format!("{} := {}", key, result.text);
+    }
+    result.text = format!("` {} ` ⟵ {}", result.value, result.text);
+    Ok(result)
+}
+
+fn parse_repeat(
+    pairs: Pairs<Rule>,
+    pratt: &PrattParser<Rule>,
+    attr_map: &mut HashMap<String, f64>,
+) -> Result<Vec<RogCons>, RogErr> {
+    let it = pairs
+        .into_iter()
+        .next()
+        .ok_or(RogErr::UnknownError)?
+        .into_inner();
+
+    let mut cons_vec = vec![];
+
+    let mut repeat_count: usize = 1;
+    let mut comment = None;
+    let mut assignment = None;
+    for pair in it {
+        match pair.as_rule() {
+            Rule::repeat_literal => {
+                let input = pair.as_str().trim();
+                repeat_count = input
+                    .strip_suffix("#")
+                    .unwrap_or(input)
+                    .parse()
+                    .map_err(|_| RogErr::UnknownError)?;
+            }
+            Rule::comment => comment = pair.as_str().strip_prefix(";"),
+            Rule::assignment => assignment = Some(pair.into_inner()),
+            Rule::EOI => {
+                continue;
+            }
+            r => println!("{:?}", r),
+        }
+    }
+
+    let assignment = assignment.ok_or(RogErr::UnknownError)?;
+    if repeat_count > 100 {
+        return Err(RogErr::LineMax);
+    }
+    for _ in 0..repeat_count {
+        let mut current_cons = parse_assignment(assignment.clone(), pratt, attr_map)?;
+        if let Some(c) = comment {
+            current_cons.text = format!("**{}** {}", c.trim(), current_cons.text);
+        }
+        cons_vec.push(current_cons);
+    }
+
+    Ok(cons_vec)
+}
+
+#[napi(object)]
+#[derive(Debug)]
+pub struct Output {
+    pub cons: Vec<RogCons>,
+    pub attr_map: HashMap<String, f64>,
+}
+
 #[napi]
-pub fn parse(input: String, attr_map: HashMap<String, f64>) -> Option<RogCons> {
+pub fn parse(input: String, mut attr_map: HashMap<String, f64>) -> Option<Output> {
     let pratt = get_parser();
-    let pairs = RogParser::parse(Rule::expression, &input).ok()?;
-    parse_rog(pairs, &pratt, &attr_map).ok()
+
+    let inputs = input.split("\n").map(str::trim).filter(|i| !i.is_empty());
+
+    let mut cons = vec![];
+    for input in inputs {
+        if cons.len() >= 100 {
+            return None;
+        }
+        let pairs = RogParser::parse(Rule::repeat, &input).ok()?;
+        let mut assign = parse_repeat(pairs, &pratt, &mut attr_map).ok()?;
+        cons.append(&mut assign);
+    }
+
+    Some(Output { cons, attr_map })
 }
 
 #[test]
 fn test() {
-    let pratt = get_parser();
-    let pairs = RogParser::parse(Rule::expression, "d20 + 2LONGO * C + 4").unwrap();
     let map = HashMap::from([
         (String::from("A"), 10.),
         (String::from("B"), 15.),
         (String::from("C"), 392.),
         (String::from("LONGO"), 8.),
     ]);
-    //dbg!(&pairs);
-    let res = parse_rog(pairs, &pratt, &map);
-    println!("{:?}", res);
+    let out = parse("$CU := 0\n  \n\n30#$CU := $CU + 1".to_string(), map).unwrap();
+    let c = out
+        .cons
+        .into_iter()
+        .map(|r| r.text)
+        .collect::<Vec<_>>()
+        .join("\n");
+    println!("{}", c);
 }
 
 // fn main() -> std::io::Result<()> {

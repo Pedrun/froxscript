@@ -7,6 +7,7 @@ pub struct RogCons {
     pub values: Vec<f64>,
     pub text: String,
     pub boolean: bool,
+    pub dice: u32,
 }
 
 impl RogCons {
@@ -20,9 +21,9 @@ impl RogCons {
                 text
             },
             boolean: false,
+            dice: 0,
         }
     }
-
     pub fn hyper_add(mut self, rhs: Self) -> Self {
         self.value += rhs.value * self.values.len() as f64;
         self.values.iter_mut().for_each(|v| *v += rhs.value);
@@ -34,6 +35,7 @@ impl RogCons {
             .join(", ");
         self.text = format!("[{}] ⟵ {} ++ {}", joined, self.text, rhs.text);
         self.boolean = false;
+        self.dice += rhs.dice;
         self
     }
     pub fn hyper_sub(mut self, rhs: Self) -> Self {
@@ -47,36 +49,42 @@ impl RogCons {
             .join(", ");
         self.text = format!("[{}] ⟵ {} -- {}", joined, self.text, rhs.text);
         self.boolean = false;
+        self.dice += rhs.dice;
         self
     }
     pub fn less(self, rhs: Self) -> Self {
         let value = if self.value < rhs.value { 1. } else { 0. };
         let mut cons = Self::from_number(value, format!("{} < {}", self.text, rhs.text));
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
     pub fn less_eq(self, rhs: Self) -> Self {
         let value = if self.value <= rhs.value { 1. } else { 0. };
         let mut cons = Self::from_number(value, format!("{} <= {}", self.text, rhs.text));
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
     pub fn greater(self, rhs: Self) -> Self {
         let value = if self.value > rhs.value { 1. } else { 0. };
         let mut cons = Self::from_number(value, format!("{} > {}", self.text, rhs.text));
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
     pub fn greater_eq(self, rhs: Self) -> Self {
         let value = if self.value >= rhs.value { 1. } else { 0. };
         let mut cons = Self::from_number(value, format!("{} >= {}", self.text, rhs.text));
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
     pub fn eq(self, rhs: Self) -> Self {
         let value = if self.value == rhs.value { 1. } else { 0. };
         let mut cons = Self::from_number(value, format!("{} = {}", self.text, rhs.text));
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
     pub fn percent(mut self) -> Self {
@@ -108,37 +116,45 @@ impl ToString for RogCons {
 impl std::ops::Add for RogCons {
     type Output = RogCons;
     fn add(self, rhs: Self) -> Self::Output {
-        Self::from_number(
+        let mut cons = Self::from_number(
             self.value + rhs.value,
             format!("{} + {}", self.text, rhs.text),
-        )
+        );
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::Sub for RogCons {
     type Output = RogCons;
     fn sub(self, rhs: Self) -> Self::Output {
-        Self::from_number(
+        let mut cons = Self::from_number(
             self.value - rhs.value,
             format!("{} - {}", self.text, rhs.text),
-        )
+        );
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::Mul for RogCons {
     type Output = RogCons;
     fn mul(self, rhs: Self) -> Self::Output {
-        Self::from_number(
+        let mut cons = Self::from_number(
             self.value * rhs.value,
             format!("{} * {}", self.text, rhs.text),
-        )
+        );
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::Div for RogCons {
     type Output = RogCons;
     fn div(self, rhs: Self) -> Self::Output {
-        Self::from_number(
+        let mut cons = Self::from_number(
             self.value / rhs.value,
             format!("{} / {}", self.text, rhs.text),
-        )
+        );
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::BitAnd for RogCons {
@@ -151,6 +167,7 @@ impl std::ops::BitAnd for RogCons {
             format!("{} & {}", self.text, rhs.text),
         );
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
 }
@@ -164,6 +181,7 @@ impl std::ops::BitOr for RogCons {
             format!("{} | {}", self.text, rhs.text),
         );
         cons.boolean = true;
+        cons.dice = self.dice + rhs.dice;
         cons
     }
 }
@@ -171,20 +189,26 @@ impl std::ops::Shl for RogCons {
     type Output = RogCons;
     fn shl(self, rhs: Self) -> Self::Output {
         let value = self.values.into_iter().filter(|v| v <= &rhs.value).count();
-        RogCons::from_number(value as f64, format!("{} << {}", self.text, rhs.text))
+        let mut cons = RogCons::from_number(value as f64, format!("{} << {}", self.text, rhs.text));
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::Shr for RogCons {
     type Output = RogCons;
     fn shr(self, rhs: Self) -> Self::Output {
         let value = self.values.into_iter().filter(|v| v >= &rhs.value).count();
-        RogCons::from_number(value as f64, format!("{} >> {}", self.text, rhs.text))
+        let mut cons = RogCons::from_number(value as f64, format!("{} >> {}", self.text, rhs.text));
+        cons.dice = self.dice + rhs.dice;
+        cons
     }
 }
 impl std::ops::Neg for RogCons {
     type Output = RogCons;
     fn neg(self) -> Self::Output {
-        RogCons::from_number(-self.value, format!("-{}", self.text))
+        let mut cons = RogCons::from_number(-self.value, format!("-{}", self.text));
+        cons.dice = self.dice;
+        cons
     }
 }
 impl std::ops::Not for RogCons {
@@ -192,6 +216,7 @@ impl std::ops::Not for RogCons {
     fn not(self) -> Self::Output {
         let value = if self.value != 0. { 0. } else { 1. };
         let mut cons = Self::from_number(value, format!("!{}", self.text));
+        cons.dice = self.dice;
         cons.boolean = true;
         cons
     }

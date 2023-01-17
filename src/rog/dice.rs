@@ -193,6 +193,7 @@ impl Dice {
             text,
             values: final_values,
             boolean: false,
+            dice: self.count as u32,
         })
     }
 }
@@ -236,6 +237,7 @@ impl FateDice {
             text,
             values,
             boolean: false,
+            dice: self.count as u32,
         })
     }
 }
@@ -247,4 +249,7 @@ pub enum RogErr {
     ExplodeMin,
     ExplodeChanceHigh,
     InvalidAttribute,
+    AttributeMax,
+    LineMax,
+    UnknownError,
 }

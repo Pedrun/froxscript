@@ -1,5 +1,8 @@
 {
-  "dependencies": {
-    "@napi-rs/cli": "^2.14.3"
-  }
+    "dependencies": {
+        "@napi-rs/cli": "^2.14.3"
+    },
+    "scripts": {
+        "build": "npx napi build --release ./dll"
+    }
 }
