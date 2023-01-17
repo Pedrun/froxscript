@@ -221,7 +221,20 @@ fn parse_assignment(
         result.text = format!("{} := {}", key, result.text);
         result.dice += 1;
     }
-    result.text = format!("` {} ` ⟵ {}", result.value, result.text);
+    result.text = if result.boolean {
+        format!(
+            "` {} ` ⟵ {}",
+            if result.value != 0. {
+                "**Sucesso!**"
+            } else {
+                "**Falha!**"
+            },
+            result.text
+        )
+    } else {
+        format!("` {} ` ⟵ {}", result.value, result.text)
+    };
+
     Ok(result)
 }
 
