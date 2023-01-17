@@ -228,14 +228,13 @@ fn parse_repeat(
     pairs: Pairs<Rule>,
     pratt: &PrattParser<Rule>,
     attr_map: &mut HashMap<String, f64>,
-) -> Result<Vec<RogCons>, RogErr> {
+    buf: &mut Vec<RogCons>,
+) -> Result<(), RogErr> {
     let it = pairs
         .into_iter()
         .next()
         .ok_or(RogErr::UnknownError)?
         .into_inner();
-
-    let mut cons_vec = vec![];
 
     let mut repeat_count: usize = 1;
     let mut comment = None;
@@ -260,18 +259,18 @@ fn parse_repeat(
     }
 
     let assignment = assignment.ok_or(RogErr::UnknownError)?;
-    if repeat_count > 100 {
-        return Err(RogErr::LineMax);
-    }
     for _ in 0..repeat_count {
+        if buf.len() >= 100 {
+            return Err(RogErr::LineMax);
+        }
         let mut current_cons = parse_assignment(assignment.clone(), pratt, attr_map)?;
         if let Some(c) = comment {
             current_cons.text = format!("**{}** {}", c.trim(), current_cons.text);
         }
-        cons_vec.push(current_cons);
+        buf.push(current_cons);
     }
 
-    Ok(cons_vec)
+    Ok(())
 }
 
 #[napi(object)]
@@ -289,12 +288,8 @@ pub fn parse(input: String, mut attr_map: HashMap<String, f64>) -> Option<Output
 
     let mut cons = vec![];
     for input in inputs {
-        if cons.len() >= 100 {
-            return None;
-        }
         let pairs = RogParser::parse(Rule::repeat, &input).ok()?;
-        let mut assign = parse_repeat(pairs, &pratt, &mut attr_map).ok()?;
-        cons.append(&mut assign);
+        parse_repeat(pairs, &pratt, &mut attr_map, &mut cons).ok()?;
     }
 
     Some(Output { cons, attr_map })
@@ -308,14 +303,18 @@ fn test() {
         (String::from("C"), 392.),
         (String::from("LONGO"), 8.),
     ]);
-    let out = parse("$CU := 0\n  \n\n30#$CU := $CU + 1".to_string(), map).unwrap();
-    let c = out
-        .cons
-        .into_iter()
-        .map(|r| r.text)
-        .collect::<Vec<_>>()
-        .join("\n");
-    println!("{}", c);
+    let out = parse("101#d20".to_string(), map);
+    if let Some(out) = out {
+        let c = out
+            .cons
+            .into_iter()
+            .map(|r| r.text)
+            .collect::<Vec<_>>()
+            .join("\n");
+        println!("{}", c);
+    } else {
+        println!("{:?}", out);
+    }
 }
 
 // fn main() -> std::io::Result<()> {
