@@ -38,7 +38,7 @@ fn parse_expression(
             }
             Rule::fate_dice => roll_fate(primary.into_inner(), attr_map),
             Rule::dice => roll_dice(primary.into_inner(), attr_map),
-            _ => unreachable!(),
+            _ => return Err(RogErr::UnknownError),
         })
         .map_infix(|lhs, op, rhs| {
             let lhs = lhs?;
@@ -59,7 +59,7 @@ fn parse_expression(
                 Rule::sub => lhs - rhs,
                 Rule::mul => lhs * rhs,
                 Rule::div => lhs / rhs,
-                _ => unreachable!(),
+                _ => return Err(RogErr::UnknownError),
             })
         })
         .map_prefix(|op, rhs| {
@@ -67,14 +67,14 @@ fn parse_expression(
             Ok(match op.as_rule() {
                 Rule::neg => -rhs,
                 Rule::not => !rhs,
-                _ => unreachable!(),
+                _ => return Err(RogErr::UnknownError),
             })
         })
         .map_postfix(|lhs, op| {
             let lhs = lhs?;
             Ok(match op.as_rule() {
                 Rule::percent => lhs.percent(),
-                _ => unreachable!(),
+                _ => return Err(RogErr::UnknownError),
             })
         })
         .parse(pairs);
@@ -150,7 +150,7 @@ fn keep_drop_config(
     attr_map: &HashMap<String, f64>,
 ) -> Result<(KeepDrop, usize), RogErr> {
     let mut iter = pairs.into_iter();
-    let keep_drop = match iter.next().unwrap().as_rule() {
+    let keep_drop = match iter.next().ok_or(RogErr::UnknownError)?.as_rule() {
         Rule::keep_high => KeepDrop::KeepHigh,
         Rule::keep_low => KeepDrop::KeepLow,
         Rule::drop_high => KeepDrop::DropHigh,
@@ -158,13 +158,13 @@ fn keep_drop_config(
         Rule::crit => KeepDrop::Crit,
         _ => unreachable!(),
     };
-    let value = parse_number(iter.next().unwrap().as_str(), attr_map)? as usize;
+    let value = parse_number(iter.next().ok_or(RogErr::UnknownError)?.as_str(), attr_map)? as usize;
     Ok((keep_drop, value))
 }
 
 fn roll_fate(pairs: Pairs<Rule>, attr_map: &HashMap<String, f64>) -> Result<RogCons, RogErr> {
     let mut dice = FateDice::new();
-    let pair = pairs.into_iter().next().unwrap();
+    let pair = pairs.into_iter().next().ok_or(RogErr::UnknownError)?;
     match pair.as_rule() {
         Rule::dice_n => {
             if !pair.as_str().is_empty() {
@@ -316,26 +316,3 @@ fn test() {
         println!("{:?}", out);
     }
 }
-
-// fn main() -> std::io::Result<()> {
-//     let parser = get_parser();
-
-//     let buf = fs::read_to_string("out.rog")?;
-
-//     let mut count = 0;
-//     let time = SystemTime::now();
-//     for i in buf.split("\r\n") {
-//         if i.is_empty() {
-//             continue;
-//         }
-//         parse(i, &parser);
-//         count += 1;
-//     }
-//     println!(
-//         "Parsed {} expressions in {:.3}s.",
-//         count,
-//         time.elapsed().unwrap().as_secs_f64()
-//     );
-
-//     Ok(())
-// }

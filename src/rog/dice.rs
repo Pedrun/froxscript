@@ -145,7 +145,7 @@ impl Dice {
         let values: Vec<(f64, bool)> = values.into_iter().map(|x| (x, true)).collect();
         let mut sorted_values: Vec<(f64, bool)> = values.clone().into_iter().collect();
 
-        sorted_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        sorted_values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
         sorted_values.reverse();
 
         let mut keep_range = 0..sorted_values.len();
@@ -214,7 +214,7 @@ impl FateDice {
         } else if x == &-1. {
             "**-**".to_string()
         } else {
-            panic!("Bad item in fate dice: {}", x);
+            "???".to_string()
         }
     }
     pub fn roll(self) -> Result<RogCons, RogErr> {
