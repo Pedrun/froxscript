@@ -219,6 +219,7 @@ fn parse_assignment(
             return Err(RogErr::AttributeMax);
         }
         result.text = format!("{} := {}", key, result.text);
+        result.dice += 1;
     }
     result.text = format!("` {} ` ⟵ {}", result.value, result.text);
     Ok(result)
@@ -303,7 +304,7 @@ fn test() {
         (String::from("C"), 392.),
         (String::from("LONGO"), 8.),
     ]);
-    let out = parse("101#d20".to_string(), map);
+    let out = parse("11#d20 + A * LONGO ; constea".to_string(), map);
     if let Some(out) = out {
         let c = out
             .cons
@@ -313,6 +314,6 @@ fn test() {
             .join("\n");
         println!("{}", c);
     } else {
-        println!("{:?}", out);
+        panic!();
     }
 }
