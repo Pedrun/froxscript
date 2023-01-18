@@ -16,15 +16,16 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 
 ## Valores
 
-| Sintaxe                    | Descrição                                                                                                                                                                                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `123456`                   | Números inteiros                                                                                                                                                                                                                                  |
-| `0.23` ou `.23`, `2.712`   | Números decimais                                                                                                                                                                                                                                  |
-| `ATRIBUTO`, `NOME_LEGAL`   | Atributos presentes na sua ficha. Note que eles sempre devem ser escritos em letra maiúscula e só podem conter caracteres de A a Z e \_.                                                                                                          |
+| Sintaxe | Descrição |
+| --- | --- |
+| `123456` | Números |
+| `0.23` ou `.23`, `2.712` | Números decimais |
+| `ATRIBUTO`, `NOME_LEGAL` | Atributos presentes na sua ficha. Note que eles sempre devem ser escritos em letra maiúscula e só podem conter caracteres de A a Z e \_. |
 | `$VARIAVEL`, `$DANO_TOTAL` | Variáveis, valores temporários que tem um nome. Funcionam como atributos que não pertencem à sua ficha e são excluídos logo depois do fim da última linha. Só pode conter caracteres de A a Z e \_ além de ser obrigatório o $ no começo do nome. |
 
 ## Dados
 
-| Sintaxe       | Descrição                                                                                                                                       |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `df` ou `Xdf` | _(X é um número inteiro qualquer)_\ **Dado da sorte**. é um dado que tem 3 resultados: negativo, neutro ou positivo (respectivamente -, 0 e +). |
+| Sintaxe | Descrição |
+| --- | --- |
+| `df` ou `Xdf` | _(X é um número inteiro qualquer)_\
+**Dado da sorte**. é um dado que tem 3 resultados: negativo, neutroP ou positivo (respectivamente -, 0 e +). |
