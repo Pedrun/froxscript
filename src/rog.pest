@@ -9,6 +9,9 @@ expression = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postf
 prefix = _{ neg | not }
     neg = { "-" }
     not = { "!" }
+    ceil = { "^" }
+    round = { "~" }
+    floor = { "v" }
 
 postfix = _{ percent }
     percent = { "%" }

@@ -67,6 +67,9 @@ fn parse_expression(
             Ok(match op.as_rule() {
                 Rule::neg => -rhs,
                 Rule::not => !rhs,
+                Rule::ceil => rhs.ceil(),
+                Rule::round => rhs.round(),
+                Rule::floor => rhs.floor(),
                 _ => return Err(RogErr::UnknownError),
             })
         })

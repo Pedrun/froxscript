@@ -1,3 +1,5 @@
+use std::vec;
+
 use napi_derive::napi;
 
 #[derive(Debug)]
@@ -91,6 +93,24 @@ impl RogCons {
         self.value /= 100.0;
         self.values = vec![self.value];
         self.text += "%";
+        self
+    }
+    pub fn ceil(mut self) -> Self {
+        self.value = self.value.ceil();
+        self.values = vec![self.value];
+        self.text = format!("^{}", self.text);
+        self
+    }
+    pub fn round(mut self) -> Self {
+        self.value = self.value.round();
+        self.values = vec![self.value];
+        self.text = format!("~{}", self.text);
+        self
+    }
+    pub fn floor(mut self) -> Self {
+        self.value = self.value.floor();
+        self.values = vec![self.value];
+        self.text = format!("v{}", self.text);
         self
     }
 }
