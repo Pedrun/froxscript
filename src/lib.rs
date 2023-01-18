@@ -323,7 +323,7 @@ fn test() {
         (String::from("LONGO"), 8.),
     ]);
     let mut cons = vec![];
-    let input = "~.5";
+    let input = "~23.5";
 
     let pairs = RogParser::parse(Rule::repeat, input).unwrap();
     parse_repeat(pairs, &pratt, &mut map, &mut cons).unwrap();

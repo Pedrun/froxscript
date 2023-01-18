@@ -33,7 +33,7 @@ infix = _{ hyper_add | hyper_sub | add | sub | div | mul | counter_less | counte
     or = { "|" }
     and = { "&" }
 
-primary = _{ fate_dice | dice | number | frac | group }
+primary = _{ fate_dice | dice | frac | number | group }
     fate_dice = { dice_n ~ "df" }
     dice = ${ dice_n ~ "d" ~ dice_side ~ roll_config }
         dice_n = { number? }
