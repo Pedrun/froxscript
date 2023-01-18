@@ -11,7 +11,7 @@ prefix = _{ neg | not | ceil | round | floor }
     not = { "!" }
     ceil = { "^" }
     round = { "~" }
-    floor = { "v" }
+    floor = { "_" }
 
 postfix = _{ percent }
     percent = { "%" }
@@ -33,7 +33,7 @@ infix = _{ hyper_add | hyper_sub | add | sub | div | mul | counter_less | counte
     or = { "|" }
     and = { "&" }
 
-primary = _{ fate_dice | dice | number | group }
+primary = _{ fate_dice | dice | number | frac | group }
     fate_dice = { dice_n ~ "df" }
     dice = ${ dice_n ~ "d" ~ dice_side ~ roll_config }
         dice_n = { number? }
@@ -48,9 +48,10 @@ primary = _{ fate_dice | dice | number | group }
                 crit = { "c" }
             aro = { "aro" }
             sort = { "s" }
+    frac = @{ '0'..'9'* ~ "." ~ '0'..'9'+ }
     number = _{ attribute | integer }
         attribute = @{ integer? ~ attribute_literal }
-        attribute_literal = { "$"? ~ 'A'..'Z'+ }
+        attribute_literal = { "$"? ~ ('A'..'Z' | "_")+ }
         integer = @{ '0'..'9'+ }
     group = { "(" ~ expression ~ ")" }
 

@@ -19,7 +19,7 @@ fn parse_expression(
 ) -> Result<RogCons, RogErr> {
     let result = pratt
         .map_primary(|primary| match primary.as_rule() {
-            Rule::integer => Ok(RogCons::from_number(
+            Rule::integer | Rule::frac => Ok(RogCons::from_number(
                 parse_number(primary.as_str(), attr_map)?,
                 String::new(),
             )),
@@ -199,6 +199,7 @@ fn get_parser() -> PrattParser<Rule> {
             | Op::infix(Rule::and, Assoc::Left)
             | Op::infix(Rule::or, Assoc::Left))
         .op(Op::postfix(Rule::percent))
+        .op(Op::prefix(Rule::ceil) | Op::prefix(Rule::round) | Op::prefix(Rule::floor))
         .op(Op::prefix(Rule::neg) | Op::prefix(Rule::not))
 }
 
@@ -314,22 +315,23 @@ pub fn parse(input: String, mut attr_map: HashMap<String, f64>) -> Option<Output
 
 #[test]
 fn test() {
-    let map = HashMap::from([
+    let pratt = get_parser();
+    let mut map = HashMap::from([
         (String::from("A"), 10.),
         (String::from("B"), 15.),
         (String::from("C"), 392.),
         (String::from("LONGO"), 8.),
     ]);
-    let out = parse("11#d20 + A * LONGO ; constea".to_string(), map);
-    if let Some(out) = out {
-        let c = out
-            .cons
-            .into_iter()
-            .map(|r| r.text)
-            .collect::<Vec<_>>()
-            .join("\n");
-        println!("{}", c);
-    } else {
-        panic!();
-    }
+    let mut cons = vec![];
+    let input = "~.5";
+
+    let pairs = RogParser::parse(Rule::repeat, input).unwrap();
+    parse_repeat(pairs, &pratt, &mut map, &mut cons).unwrap();
+
+    let c = cons
+        .into_iter()
+        .map(|r| r.text)
+        .collect::<Vec<_>>()
+        .join("\n");
+    println!("{}", c);
 }
