@@ -22,7 +22,7 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 | `123456` | Números inteiros. |
 | `0.23` ou `.23`, `2.712` | Números decimais. |
 | `ATRIBUTO`, `NOME_LEGAL` | Atributos presentes na sua ficha. Note que eles sempre devem ser escritos em letra maiúscula e só podem conter caracteres de A a Z e \_. |
-| `$VARIAVEL`, `$DANO_TOTAL` | Variáveis, valores temporários que tem um nome. Funcionam como atributos que não pertencem à sua ficha e são excluídos logo depois do fim da última linha. Só é possivel usar uma variável se ela foi [definida](#definição) antes. Só pode conter caracteres de A a Z e \_ além de ser obrigatório o $ no começo do nome. |
+| `$VARIAVEL`, `$DANO_TOTAL` | Variáveis, valores temporários que tem um nome. Funcionam como atributos que não pertencem à sua ficha e são excluídos logo depois do fim da última linha. Só é possivel usar uma variável se ela foi [definida](#atribuição) antes. Só pode conter caracteres de A a Z e \_ além de ser obrigatório o $ no começo do nome. |
 | Dados | Ver [Dados](#dados).
 | `(expressão)` | É possível envolver uma expressão em volta de parênteses para aumentar a sua prioridade. |
 
