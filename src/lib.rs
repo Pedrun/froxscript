@@ -312,26 +312,3 @@ pub fn parse(input: String, mut attr_map: HashMap<String, f64>) -> Option<Output
 
     Some(Output { cons, attr_map })
 }
-
-#[test]
-fn test() {
-    let pratt = get_parser();
-    let mut map = HashMap::from([
-        (String::from("A"), 10.),
-        (String::from("B"), 15.),
-        (String::from("C"), 392.),
-        (String::from("LONGO"), 8.),
-    ]);
-    let mut cons = vec![];
-    let input = "~23.5";
-
-    let pairs = RogParser::parse(Rule::repeat, input).unwrap();
-    parse_repeat(pairs, &pratt, &mut map, &mut cons).unwrap();
-
-    let c = cons
-        .into_iter()
-        .map(|r| r.text)
-        .collect::<Vec<_>>()
-        .join("\n");
-    println!("{}", c);
-}
