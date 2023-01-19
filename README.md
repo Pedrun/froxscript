@@ -4,7 +4,7 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 
 ## Diferenças entre o FroxScript e Rollem
 
--   **Performance** - O FroxScript é feito em [Rust](https://www.rust-lang.org) em conjunto com [Pest](https://pest.rs) em sua base, visando um alto desempenho, enquanto que o Rollem é feito em [Javascript](https://www.javascript.com), que é até 20 vezes mais lento.
+-   **Performance** - O FroxScript é feito em [Rust](https://www.rust-lang.org) em conjunto com [Pest](https://pest.rs) em sua base, visando um alto desempenho. Enquanto que o Rollem é feito em [Javascript](https://www.javascript.com), que é até 20 vezes mais lento.
 -   **Números decimais** - O FroxScript adiciona o suporte à números com casas decimais tipo `1.41`, `3.1415`, ou `.271`.
 -   **Multi-linha** - O FroxScript, diferente do Rollem, aceita várias linhas de uma vez, com cada linha contendo uma expressão.
 -   **Atributos** - O FroxScript em conjunto com o Frox consegue utilizar os atributos de sua ficha no meio da expressão, facilitando as rolagens de dados. - _Nunca mais você vai ter que ficar olhando sua ficha toda vez que quer usar uma skill ou fazer um teste!_
