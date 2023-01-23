@@ -2,7 +2,13 @@ repeat = { repeat_literal? ~ assignment ~ comment? ~ EOI }
     repeat_literal = @{ integer ~ "#" }
     comment = { ";" ~ ANY* }
 
-assignment = { (attribute_literal ~ ":=")? ~ expression }
+assignment = { (attribute_literal ~ assigner)? ~ expression }
+    assigner = _{ assign_eq | assign_add | assign_sub | assign_mul | assign_div }
+        assign_eq = { ":=" }
+        assign_add = { ":+" }
+        assign_sub = { ":-" }
+        assign_mul = { ":*" }
+        assign_div = { ":/" }
 
 expression = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
 

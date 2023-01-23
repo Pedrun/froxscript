@@ -212,17 +212,29 @@ fn parse_assignment(
     let expression_pairs = it.next().ok_or(RogErr::UnknownError)?.into_inner();
     let mut result = parse_expression(expression_pairs, pratt, attr_map)?;
 
-    let assignment_pairs = it.next();
-    if let Some(assign) = assignment_pairs {
-        let key = assign.as_str().trim().to_string();
+    if let Some(assigner) = it.next() {
+        let attribute = it.next().ok_or(RogErr::UnknownError)?;
+        let key = attribute.as_str().trim().to_string();
         if !key.starts_with('$') && !attr_map.contains_key(&key) {
             return Err(RogErr::InvalidAttribute);
         }
-        attr_map.insert(key.clone(), result.value);
+
+        attr_map
+            .entry(key.clone())
+            .and_modify(|e| match assigner.as_rule() {
+                Rule::assign_eq => *e = result.value,
+                Rule::assign_add => *e += result.value,
+                Rule::assign_sub => *e -= result.value,
+                Rule::assign_mul => *e *= result.value,
+                Rule::assign_div => *e /= result.value,
+                _ => {}
+            })
+            .or_insert(result.value);
+
         if attr_map.len() > 100 {
             return Err(RogErr::AttributeMax);
         }
-        result.text = format!("{} := {}", key, result.text);
+        result.text = format!("{} {} {}", key, assigner.as_str(), result.text);
         result.dice += 1;
     }
     result.text = if result.boolean {
