@@ -219,7 +219,7 @@ fn parse_assignment(
             return Err(RogErr::InvalidAttribute);
         }
 
-        attr_map
+        result.value = *attr_map
             .entry(key.clone())
             .and_modify(|e| match assigner.as_rule() {
                 Rule::assign_eq => *e = result.value,
@@ -234,6 +234,7 @@ fn parse_assignment(
         if attr_map.len() > 100 {
             return Err(RogErr::AttributeMax);
         }
+
         result.text = format!("{} {} {}", key, assigner.as_str(), result.text);
         result.dice += 1;
     }
