@@ -229,7 +229,14 @@ fn parse_assignment(
                 Rule::assign_div => *e /= result.value,
                 _ => {}
             })
-            .or_insert(result.value);
+            .or_insert_with(|| match assigner.as_rule() {
+                Rule::assign_eq => result.value,
+                Rule::assign_add => result.value,
+                Rule::assign_sub => -result.value,
+                Rule::assign_mul => 0.,
+                Rule::assign_div => 0.,
+                _ => 0.,
+            });
 
         if attr_map.len() > 100 {
             return Err(RogErr::AttributeMax);
