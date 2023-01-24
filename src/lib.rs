@@ -242,7 +242,13 @@ fn parse_assignment(
             return Err(RogErr::AttributeMax);
         }
 
-        result.text = format!("{} {} {}", key, assigner.as_str(), result.text);
+        let op_str = if assigner.as_rule() == Rule::assign_mul {
+            ":\\*"
+        } else {
+            assigner.as_str()
+        };
+
+        result.text = format!("{} {} {}", key, op_str, result.text);
         result.dice += 1;
     }
     result.text = if result.boolean {

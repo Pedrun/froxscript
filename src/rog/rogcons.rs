@@ -160,7 +160,7 @@ impl std::ops::Mul for RogCons {
     fn mul(self, rhs: Self) -> Self::Output {
         let mut cons = Self::from_number(
             self.value * rhs.value,
-            format!("{} * {}", self.text, rhs.text),
+            format!("{} \\* {}", self.text, rhs.text),
         );
         cons.dice = self.dice + rhs.dice;
         cons
