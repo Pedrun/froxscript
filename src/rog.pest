@@ -7,7 +7,7 @@ assignment = { (attribute_literal ~ assigner)? ~ expression }
         assign_eq = { ":=" }
         assign_add = { ":+" }
         assign_sub = { ":-" }
-        assign_mul = { ":*" | ":\\*" }
+        assign_mul = { ":*" | ":\\*" | "\\:*" | "\\:\\*" }
         assign_div = { ":/" }
 
 expression = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
