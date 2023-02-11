@@ -104,13 +104,13 @@ impl RogCons {
     pub fn round(mut self) -> Self {
         self.value = self.value.round();
         self.values = vec![self.value];
-        self.text = format!("~{}", self.text);
+        self.text = format!("\\~{}", self.text);
         self
     }
     pub fn floor(mut self) -> Self {
         self.value = self.value.floor();
         self.values = vec![self.value];
-        self.text = format!("_{}", self.text);
+        self.text = format!("\\_{}", self.text);
         self
     }
 }
