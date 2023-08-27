@@ -205,6 +205,8 @@ impl std::ops::BitOr for RogCons {
         cons
     }
 }
+
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Shl for RogCons {
     type Output = RogCons;
     fn shl(self, rhs: Self) -> Self::Output {
@@ -214,6 +216,7 @@ impl std::ops::Shl for RogCons {
         cons
     }
 }
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl std::ops::Shr for RogCons {
     type Output = RogCons;
     fn shr(self, rhs: Self) -> Self::Output {

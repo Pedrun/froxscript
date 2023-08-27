@@ -4,7 +4,7 @@ use super::rogcons::*;
 use rand::random;
 use std::result::Result;
 
-pub enum Explode {
+pub enum DiceExplosion {
     NoExplode,
     Explode(usize),
     Default,
@@ -12,7 +12,7 @@ pub enum Explode {
 
 pub struct RollConfig {
     pub keep_drop: Option<(KeepDrop, usize)>,
-    pub explode: Explode,
+    pub explode: DiceExplosion,
     pub aro: bool,
     pub sort: bool,
 }
@@ -20,7 +20,7 @@ impl RollConfig {
     pub fn new() -> Self {
         Self {
             keep_drop: None,
-            explode: Explode::NoExplode,
+            explode: DiceExplosion::NoExplode,
             aro: false,
             sort: false,
         }
@@ -31,9 +31,9 @@ impl ToString for RollConfig {
         format!(
             "{}{}{}{}",
             match self.explode {
-                Explode::NoExplode => String::new(),
-                Explode::Default => String::from("!"),
-                Explode::Explode(x) => format!("!{}", x),
+                DiceExplosion::NoExplode => String::new(),
+                DiceExplosion::Default => String::from("!"),
+                DiceExplosion::Explode(x) => format!("!{}", x),
             },
             if let Some(kd) = &self.keep_drop {
                 format!(
@@ -113,9 +113,9 @@ impl Dice {
         }
         let sort = self.config.sort || self.config.keep_drop.is_some();
         let explode_size = match self.config.explode {
-            Explode::Default => Some(self.sides),
-            Explode::Explode(ex) => Some(ex),
-            Explode::NoExplode => None,
+            DiceExplosion::Default => Some(self.sides),
+            DiceExplosion::Explode(ex) => Some(ex),
+            DiceExplosion::NoExplode => None,
         };
 
         if let Some(size) = explode_size {
@@ -151,7 +151,7 @@ impl Dice {
         let mut keep_range = 0..sorted_values.len();
         let mut crit_value = self.sides as f64;
         if let Some((keep_drop, keep_value)) = &self.config.keep_drop {
-            let keep_value = usize::clamp(*keep_value, 0, self.count as usize);
+            let keep_value = usize::clamp(*keep_value, 0, self.count);
             match keep_drop {
                 KeepDrop::KeepHigh => keep_range.end = keep_value,
                 KeepDrop::KeepLow => keep_range.start = sorted_values.len() - keep_value,

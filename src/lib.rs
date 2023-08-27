@@ -1,9 +1,7 @@
 mod rog;
-use std::collections::HashMap;
-
-//use std::{fs, time::SystemTime};
 use napi_derive::napi;
 use rog::*;
+use std::collections::HashMap;
 
 #[derive(Parser)]
 #[grammar = "rog.pest"]
@@ -38,7 +36,7 @@ fn parse_expression(
             }
             Rule::fate_dice => roll_fate(primary.into_inner(), attr_map),
             Rule::dice => roll_dice(primary.into_inner(), attr_map),
-            _ => return Err(RogErr::UnknownError),
+            _ => Err(RogErr::UnknownError),
         })
         .map_infix(|lhs, op, rhs| {
             let lhs = lhs?;
@@ -85,28 +83,21 @@ fn parse_expression(
 }
 
 fn parse_number(text: &str, attr_map: &HashMap<String, f64>) -> Result<f64, RogErr> {
-    let a_start = text.find(|c| match c {
-        'A'..='Z' | '$' => true,
-        _ => false,
-    });
-    Ok(if let Some(split) = a_start {
-        if split == 0 {
-            *attr_map.get(text).ok_or(RogErr::InvalidAttribute)?
-        } else {
-            let (num, attr) = text.split_at(split);
-            let num = parse_float(num);
-            let attr = attr_map.get(attr).ok_or(RogErr::InvalidAttribute)?;
-            num * attr
-        }
+    let attr_start = text.find(|c| matches!(c, 'A'..='Z' | '$'));
+    if let Some(split) = attr_start {
+        let (num, attr) = text.split_at(split);
+        let num = if num.is_empty() { 1. } else { parse_float(num) };
+        let attr = attr_map.get(attr).ok_or(RogErr::InvalidAttribute)?;
+        Ok(num * attr)
     } else {
-        parse_float(text)
-    })
+        Ok(parse_float(text))
+    }
 }
 
 fn parse_float(float: &str) -> f64 {
     float
         .parse()
-        .expect(&format!("Expected float, got {}", float))
+        .unwrap_or_else(|_| panic!("Expected float, got {}", float))
 }
 
 fn roll_dice(pairs: Pairs<Rule>, attr_map: &HashMap<String, f64>) -> Result<RogCons, RogErr> {
@@ -136,11 +127,14 @@ fn roll_config(pairs: Pairs<Rule>, attr_map: &HashMap<String, f64>) -> Result<Ro
                 config.keep_drop = Some(keep_drop_config(pair.into_inner(), attr_map)?)
             }
             Rule::explode => {
-                config.explode = pair.into_inner().next().map_or(Ok(Explode::Default), |x| {
-                    Ok(Explode::Explode(
-                        parse_number(x.as_str(), attr_map)? as usize
-                    ))
-                })?
+                config.explode =
+                    pair.into_inner()
+                        .next()
+                        .map_or(Ok(DiceExplosion::Default), |x| {
+                            Ok(DiceExplosion::Explode(
+                                parse_number(x.as_str(), attr_map)? as usize
+                            ))
+                        })?
             }
             _ => unreachable!(),
         }
@@ -149,11 +143,10 @@ fn roll_config(pairs: Pairs<Rule>, attr_map: &HashMap<String, f64>) -> Result<Ro
 }
 
 fn keep_drop_config(
-    pairs: Pairs<Rule>,
+    mut pairs: Pairs<Rule>,
     attr_map: &HashMap<String, f64>,
 ) -> Result<(KeepDrop, usize), RogErr> {
-    let mut iter = pairs.into_iter();
-    let keep_drop = match iter.next().ok_or(RogErr::UnknownError)?.as_rule() {
+    let keep_drop = match pairs.next().ok_or(RogErr::UnknownError)?.as_rule() {
         Rule::keep_high => KeepDrop::KeepHigh,
         Rule::keep_low => KeepDrop::KeepLow,
         Rule::drop_high => KeepDrop::DropHigh,
@@ -161,7 +154,8 @@ fn keep_drop_config(
         Rule::crit => KeepDrop::Crit,
         _ => unreachable!(),
     };
-    let value = parse_number(iter.next().ok_or(RogErr::UnknownError)?.as_str(), attr_map)? as usize;
+    let value =
+        parse_number(pairs.next().ok_or(RogErr::UnknownError)?.as_str(), attr_map)? as usize;
     Ok((keep_drop, value))
 }
 
@@ -179,7 +173,7 @@ fn roll_fate(pairs: Pairs<Rule>, attr_map: &HashMap<String, f64>) -> Result<RogC
     dice.roll()
 }
 
-fn get_parser() -> PrattParser<Rule> {
+fn get_parser_logic() -> PrattParser<Rule> {
     PrattParser::new()
         .op(Op::infix(Rule::and, Assoc::Left))
         .op(Op::infix(Rule::or, Assoc::Left))
@@ -214,13 +208,13 @@ fn parse_assignment(
 
     if let Some(assigner) = it.next() {
         let attribute = it.next().ok_or(RogErr::UnknownError)?;
-        let key = attribute.as_str().trim().to_string();
-        if !key.starts_with('$') && !attr_map.contains_key(&key) {
+        let key = attribute.as_str().trim();
+        if !key.starts_with('$') && !attr_map.contains_key(key) {
             return Err(RogErr::InvalidAttribute);
         }
 
         result.value = *attr_map
-            .entry(key.clone())
+            .entry(key.to_string())
             .and_modify(|e| match assigner.as_rule() {
                 Rule::assign_eq => *e = result.value,
                 Rule::assign_add => *e += result.value,
@@ -288,17 +282,15 @@ fn parse_repeat(
             Rule::repeat_literal => {
                 let input = pair.as_str().trim();
                 repeat_count = input
-                    .strip_suffix("#")
+                    .strip_suffix('#')
                     .unwrap_or(input)
                     .parse()
                     .map_err(|_| RogErr::UnknownError)?;
             }
-            Rule::comment => comment = pair.as_str().strip_prefix(";"),
+            Rule::comment => comment = pair.as_str().strip_prefix(';'),
             Rule::assignment => assignment = Some(pair.into_inner()),
-            Rule::EOI => {
-                continue;
-            }
-            r => println!("{:?}", r),
+            Rule::EOI => continue,
+            _ => unreachable!(),
         }
     }
 
@@ -326,13 +318,13 @@ pub struct Output {
 
 #[napi]
 pub fn parse(input: String, mut attr_map: HashMap<String, f64>) -> Option<Output> {
-    let pratt = get_parser();
+    let pratt = get_parser_logic();
 
-    let inputs = input.split("\n").map(str::trim).filter(|i| !i.is_empty());
+    let inputs = input.split('\n').map(str::trim).filter(|i| !i.is_empty());
 
     let mut cons = vec![];
     for input in inputs {
-        let pairs = RogParser::parse(Rule::repeat, &input).ok()?;
+        let pairs = RogParser::parse(Rule::repeat, input).ok()?;
         parse_repeat(pairs, &pratt, &mut attr_map, &mut cons).ok()?;
     }
 
