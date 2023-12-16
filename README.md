@@ -41,7 +41,7 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 
 | Sintaxe | Descrição |
 | --- | --- |
-| ` [dado]! ` ou ` [dado]!X ` | **Explosão**. Para cada dado que deu `X` ou maior, rola um dado adicional. Se `X` for omitido, o valor dele é igual ao número de lados do `[dado]`. <br /> A chance de explodir não pode ser maior que 99.99%. <br /> Exemplo: ` d6! ` |
+| ` [dado]! ` ou ` [dado]!Y ` | **Explosão**. Para cada dado que deu `X` ou maior, rola um dado adicional. Se `X` for omitido, o valor dele é igual ao número de lados do `[dado]`. <br /> A chance de explodir não pode ser maior que 99.99%. <br /> Exemplo: ` d6! ` |
 | ` [dado]aro ` | **Iguais**. Se todos os dados caírem em números iguais, rola um dado adicional. Se esse dado adicional também cair no mesmo número, repete o processo rolando mais outro dado. <br /> Exemplo: ` 2d6aro ` |
 | ` [dado]s ` | **Ordenar**. Ordena os dados de ordem decrescente <br /> Essa opção já é inclusa ao utilizar ` k `, ` d `, ` kh `, ` kl `, ` dh ` ou ` dl `. <br /> Exemplo: ` 20d20s ` |
 | ` khX ` ou ` kX ` | **Manter maiores**. Mantém os `X` maiores dados e descarta o resto. <br /> Exemplo: ` 2d20k1 ` |
