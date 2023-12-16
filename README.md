@@ -69,7 +69,7 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 | ` A <= B ` | **Menor igual**. Cria um teste que é verdadeiro quando `A` é menor ou igual a `B`. <br /> Exemplo: ` 12 <= 12` |
 | ` A > B ` | **Maior**. Cria um teste que é verdadeiro quando `A` é maior que `B`. <br /> Exemplo: ` d20 > 16 ` |
 | ` A >= B ` | **Maior igual**. Cria um teste que é verdadeiro quando `A` é maior ou igual a `B`. <br /> Exemplo: ` d20 >= 10 ` |
-| ` A = B ` | **Igual**. Cria um teste que é verdadeiro quando `A` é igual a `B`. <br /> Exemplo: `2 = 1 + 1 ` |
+| ` A == B ` | **Igual**. Cria um teste que é verdadeiro quando `A` é igual a `B`. <br /> Exemplo: `2 = 1 + 1 ` |
 | ` T & U ` | **Ambos**. Cria um teste quando ambos os testes `T` e `U` são verdadeiros. <br /> Exemplo: ` (1 < 2) & (3 < 4) ` |
 | ` T \| U ` | **Ou**. Cria um teste quando ambos os testes `T` ou `U` são verdadeiros. <br /> Exemplo: ` (1 = 10) \| (2 <= 4) ` |
 
@@ -113,11 +113,11 @@ FroxScript (ou apenas "FS") é uma sintaxe utilizada pelo bot do discord Frox pa
 
 | Sintaxe | Descrição |
 | --- | --- |
-| ` ATR := E ` ou ` $VAR := E `| **Atribuição**. Atribui o valor da expressão `E` para o atributo/variável `ATR`/`$VAR`. No caso da variável, se ela não tiver sido criada antes, ela é criada automaticamente. Só pode haver uma atribuição por linha. <br /> Exemplo: ` ATRIBUTO := 20 ` / ` $VAR := 2d20 ++ 20 ` |
-| ` ATR :+ E ` ou ` $VAR :+ E `| Atalho para ` ATR := ATR + E ` ou ` $VAR := $VAR + E ` |
-| ` ATR :- E ` ou ` $VAR :- E `| Atalho para ` ATR := ATR - E ` ou ` $VAR := $VAR - E ` |
-| ` ATR :* E ` ou ` $VAR :* E `| Atalho para ` ATR := ATR * E ` ou ` $VAR := $VAR * E ` |
-| ` ATR :/ E ` ou ` $VAR :/ E `| Atalho para ` ATR := ATR / E ` ou ` $VAR := $VAR / E ` |
+| ` ATR = E ` ou ` $VAR = E `| **Atribuição**. Atribui o valor da expressão `E` para o atributo/variável `ATR`/`$VAR`. No caso da variável, se ela não tiver sido criada antes, ela é criada automaticamente. Só pode haver uma atribuição por linha. <br /> Exemplo: ` ATRIBUTO := 20 ` / ` $VAR := 2d20 ++ 20 ` |
+| ` ATR += E ` ou ` $VAR += E `| Atalho para ` ATR = ATR + E ` ou ` $VAR = $VAR + E ` |
+| ` ATR -= E ` ou ` $VAR -= E `| Atalho para ` ATR = ATR - E ` ou ` $VAR = $VAR - E ` |
+| ` ATR *= E ` ou ` $VAR *= E `| Atalho para ` ATR = ATR * E ` ou ` $VAR = $VAR * E ` |
+| ` ATR /= E ` ou ` $VAR /= E `| Atalho para ` ATR = ATR / E ` ou ` $VAR = $VAR / E ` |
 
 
 
