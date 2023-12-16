@@ -4,11 +4,11 @@ repeat = { repeat_literal? ~ assignment ~ comment? ~ EOI }
 
 assignment = { (attribute_literal ~ assigner)? ~ expression }
     assigner = _{ assign_eq | assign_add | assign_sub | assign_mul | assign_div }
-        assign_eq = { ":=" }
-        assign_add = { ":+" }
-        assign_sub = { ":-" }
-        assign_mul = { ":*" | ":\\*" | "\\:*" | "\\:\\*" }
-        assign_div = { ":/" }
+        assign_eq = { "=" }
+        assign_add = { "+=" }
+        assign_sub = { "-=" }
+        assign_mul = { "*=" | "\\*=" }
+        assign_div = { "/=" }
 
 expression = { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
 
@@ -35,7 +35,7 @@ infix = _{ hyper_add | hyper_sub | add | sub | div | mul | counter_less | counte
     less = { "<" }
     greater_eq = { ">=" }
     greater = { ">" }
-    eq = { "=" }
+    eq = { "==" }
     or = { "|" }
     and = { "&" }
 
